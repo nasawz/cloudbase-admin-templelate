@@ -1,0 +1,97 @@
+{
+ "envId": "{{env.ENV_ID}}",
+ "version": "2.0",
+ "$schema": "https://framework-1258016615.tcloudbaseapp.com/schema/latest.json",
+ "framework": {
+  "name": "dhkitchen-console",
+  "hooks": {
+   "postDeploy": {
+    "type": "callFunction",
+    "functions": [
+     {
+      "functionName": "db-init"
+     }
+    ]
+   }
+  },
+  "plugins": {
+   "auth": {
+    "use": "@cloudbase/framework-plugin-auth",
+    "inputs": {
+     "configs": [
+      {
+       "platform": "NONLOGIN",
+       "status": "ENABLE"
+      }
+     ]
+    }
+   },
+   "function": {
+    "use": "@cloudbase/framework-plugin-function",
+    "inputs": {
+     "functionRootPath": "cloud/functions",
+     "functions": [
+      {
+       "name": "db-init",
+       "timeout": 60,
+       "envVariables": {
+        "ADMIN_USER_NAME": "{{env.ADMIN_USER_NAME}}",
+        "ADMIN_PASS_WORD": "{{env.ADMIN_PASS_WORD}}"
+       },
+       "installDependency": true,
+       "handler": "index.main"
+      },
+      {
+       "name": "auth",
+       "timeout": 60,
+       "installDependency": true,
+       "envVariables": {
+        "PRIVATE_KEY_ID": "{{env.PRIVATE_KEY_ID}}",
+        "PRIVATE_KEY": "{{env.PRIVATE_KEY}}",
+        "ENV_ID": "{{env.ENV_ID}}"
+       },
+       "handler": "index.main",
+       "aclRule": {
+        "invoke": true
+       }
+      }
+     ]
+    }
+   },
+   "db": {
+    "use": "@cloudbase/framework-plugin-database",
+    "inputs": {
+     "collections": [
+      {
+       "collectionName": "Admin",
+       "aclTag": "PRIVATE"
+      },
+      {
+       "collectionName": "Auth",
+       "aclTag": "READONLY"
+      },
+      {
+       "collectionName": "Project",
+       "aclTag": "CUSTOM",
+       "aclRule": {
+        "read": true,
+        "write": "auth.uid in get(`database.Admin.user`).admin"
+       }
+      },
+      {
+       "collectionName": "File",
+       "aclTag": "CUSTOM",
+       "aclRule": {
+        "read": true,
+        "write": "auth.uid in get(`database.Admin.user`).admin"
+       }
+      }
+     ]
+    }
+   }
+  }
+ },
+ "functionRoot": "./functions",
+ "functions": [],
+ "region": "ap-shanghai"
+}

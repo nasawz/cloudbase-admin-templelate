@@ -1,0 +1,10 @@
+{
+  "name": "db-init",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "ISC",
+  "dependencies": {
+    "@cloudbase/node-sdk": "^2.7.1",
+    "crypto-js": "^4.0.0"
+  }
+}
